@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SQL Learning Page – Beginner-friendly SQL lessons with an in-browser SQLite playground.">
+  <title>SQL Learning – Data Science Digital Library</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪄</text></svg>">
+  <style>
+    .sql-container {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Playground Section */
+    .sql-playground {
+      background: linear-gradient(145deg, rgba(37, 37, 64, 0.92) 0%, rgba(26, 26, 46, 0.97) 100%);
+      border: 1px solid rgba(211, 166, 37, 0.25);
+      border-radius: var(--radius);
+      padding: 1.8rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .sql-playground h2 {
+      font-family: var(--font-heading);
+      font-size: 1.4rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sql-playground .playground-desc {
+      color: var(--parchment-dark);
+      opacity: 0.7;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .sql-editor-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .sql-editor {
+      width: 100%;
+      min-height: 120px;
+      max-height: 300px;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid rgba(41, 98, 255, 0.25);
+      background: rgba(0, 0, 0, 0.5);
+      color: #d4d4d4;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.3s ease;
+      tab-size: 2;
+    }
+
+    .sql-editor:focus {
+      border-color: rgba(41, 98, 255, 0.5);
+      box-shadow: 0 0 10px rgba(41, 98, 255, 0.1);
+    }
+
+    .sql-btn-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .sql-run-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid rgba(78, 201, 176, 0.4);
+      background: linear-gradient(135deg, rgba(78, 201, 176, 0.2), rgba(78, 201, 176, 0.08));
+      color: #4ec9b0;
+      transition: all 0.3s ease;
+    }
+
+    .sql-run-btn:hover {
+      background: linear-gradient(135deg, rgba(78, 201, 176, 0.35), rgba(78, 201, 176, 0.15));
+      box-shadow: 0 2px 10px rgba(78, 201, 176, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .sql-clear-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(232, 213, 163, 0.15);
+      background: rgba(232, 213, 163, 0.05);
+      color: rgba(232, 213, 163, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    .sql-clear-btn:hover {
+      background: rgba(232, 213, 163, 0.1);
+      color: rgba(232, 213, 163, 0.8);
+    }
+
+    .sql-reset-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(255, 100, 100, 0.3);
+      background: rgba(255, 100, 100, 0.08);
+      color: rgba(255, 100, 100, 0.7);
+      transition: all 0.3s ease;
+    }
+
+    .sql-reset-btn:hover {
+      background: rgba(255, 100, 100, 0.15);
+      color: #ff6666;
+    }
+
+    .sql-output {
+      margin-top: 0.5rem;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid rgba(211, 166, 37, 0.1);
+      background: rgba(0, 0, 0, 0.5);
+      min-height: 60px;
+      max-height: 400px;
+      overflow: auto;
+    }
+
+    .sql-output-label {
+      color: rgba(78, 201, 176, 0.6);
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .sql-output table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Consolas', monospace;
+      font-size: 0.82rem;
+    }
+
+    .sql-output th {
+      background: rgba(211, 166, 37, 0.15);
+      color: var(--gold);
+      padding: 0.5rem 0.8rem;
+      text-align: left;
+      border: 1px solid rgba(211, 166, 37, 0.2);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .sql-output td {
+      padding: 0.4rem 0.8rem;
+      border: 1px solid rgba(211, 166, 37, 0.08);
+      color: #d4d4d4;
+    }
+
+    .sql-output tr:hover td {
+      background: rgba(211, 166, 37, 0.05);
+    }
+
+    .sql-output .error-msg {
+      color: #f44747;
+      font-family: 'Consolas', monospace;
+      font-size: 0.85rem;
+    }
+
+    .sql-output .success-msg {
+      color: #4ec9b0;
+      font-family: 'Consolas', monospace;
+      font-size: 0.85rem;
+    }
+
+    .sql-output .info-msg {
+      color: var(--parchment-dark);
+      opacity: 0.6;
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+
+    .db-schema {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      border: 1px solid rgba(211, 166, 37, 0.1);
+    }
+
+    .db-schema h4 {
+      color: var(--gold);
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      font-family: var(--font-subheading);
+    }
+
+    .db-schema code {
+      display: block;
+      font-family: 'Consolas', monospace;
+      font-size: 0.78rem;
+      color: #88ccff;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    /* Lesson Cards */
+    .sql-lesson {
+      background: linear-gradient(145deg, rgba(37, 37, 64, 0.9) 0%, rgba(26, 26, 46, 0.95) 100%);
+      border: 1px solid rgba(211, 166, 37, 0.15);
+      border-radius: var(--radius);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      transition: border-color 0.3s ease;
+    }
+
+    .sql-lesson:hover {
+      border-color: rgba(211, 166, 37, 0.35);
+    }
+
+    .sql-lesson-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 1.5rem;
+      cursor: pointer;
+      background: linear-gradient(90deg, rgba(41, 98, 255, 0.08), transparent);
+      transition: background 0.3s ease;
+    }
+
+    .sql-lesson-header:hover {
+      background: linear-gradient(90deg, rgba(41, 98, 255, 0.15), transparent);
+    }
+
+    .sql-lesson-header h3 {
+      font-family: var(--font-subheading);
+      font-size: 1.05rem;
+      color: var(--gold-light);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sql-lesson-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(41, 98, 255, 0.2), rgba(41, 98, 255, 0.08));
+      border: 1px solid rgba(41, 98, 255, 0.3);
+      color: #6e9eff;
+      font-weight: 800;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    .sql-lesson-toggle {
+      color: var(--gold);
+      font-size: 1.2rem;
+      transition: transform 0.3s ease;
+    }
+
+    .sql-lesson.open .sql-lesson-toggle {
+      transform: rotate(180deg);
+    }
+
+    .sql-lesson-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+    }
+
+    .sql-lesson.open .sql-lesson-content {
+      max-height: 5000px;
+    }
+
+    .sql-lesson-body {
+      padding: 1.5rem;
+      border-top: 1px solid rgba(211, 166, 37, 0.08);
+    }
+
+    .sql-lesson-body p {
+      color: var(--parchment-dark);
+      font-size: 0.92rem;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+
+    .sql-lesson-body strong {
+      color: var(--gold-light);
+    }
+
+    .sql-example {
+      margin: 1rem 0;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      border-left: 3px solid rgba(41, 98, 255, 0.5);
+    }
+
+    .sql-example-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: rgba(41, 98, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.4rem;
+      display: block;
+    }
+
+    .sql-example code {
+      font-family: 'Consolas', monospace;
+      font-size: 0.85rem;
+      color: #88ccff;
+      line-height: 1.6;
+      display: block;
+      white-space: pre-wrap;
+    }
+
+    .try-it-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(78, 201, 176, 0.05);
+      border: 1px solid rgba(78, 201, 176, 0.15);
+      border-radius: 8px;
+    }
+
+    .try-it-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #4ec9b0;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .try-it-box textarea {
+      width: 100%;
+      min-height: 60px;
+      padding: 0.7rem;
+      border-radius: 6px;
+      border: 1px solid rgba(78, 201, 176, 0.2);
+      background: rgba(0, 0, 0, 0.4);
+      color: #d4d4d4;
+      font-family: 'Consolas', monospace;
+      font-size: 0.83rem;
+      resize: vertical;
+      outline: none;
+    }
+
+    .try-it-box textarea:focus {
+      border-color: rgba(78, 201, 176, 0.4);
+    }
+
+    .try-it-box .sql-run-btn {
+      margin-top: 0.5rem;
+      font-size: 0.78rem;
+      padding: 0.4rem 1rem;
+    }
+
+    .try-it-output {
+      margin-top: 0.5rem;
+      max-height: 250px;
+      overflow: auto;
+    }
+
+    .loading-sql {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--parchment-dark);
+      opacity: 0.6;
+      margin-bottom: 1rem;
+    }
+
+    .loading-sql .dot-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: pulse 1s ease infinite;
+    }
+
+    @media (max-width: 768px) {
+      .sql-container { padding: 1rem; }
+      .sql-playground { padding: 1.2rem; }
+      .sql-lesson-body { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Page Load Overlay -->
+  <div id="page-load-overlay" class="page-load-overlay">
+    <span class="wand-icon">🪄✨</span>
+  </div>
+
+  <!-- Magical Background -->
+  <div id="magical-bg"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar" role="navigation" aria-label="Main Navigation">
+    <a href="index.html" class="brand">
+      <img src="images/college-logo.png" alt="College Logo" class="nav-logo">
+      Digital Library
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="modules.html">Modules</a></li>
+      <li><a href="experiments.html">Experiments</a></li>
+      <li><a href="tools.html" class="active">Tools</a></li>
+      <li><a href="resources.html">Resources</a></li>
+      <li><a href="projects.html">Projects</a></li>
+    </ul>
+    <a href="about.html" class="nav-profile-pic" title="About Me">
+      <img src="images/profile.jpeg" alt="Profile" id="nav-profile-img">
+    </a>
+  </nav>
+
+  <!-- Page Header -->
+  <section class="page-header">
+    <h1>🗄️ Learn SQL</h1>
+    <p>"Data speaks to those who know how to ask the right questions."</p>
+    <div class="divider"><span>⚡</span></div>
+  </section>
+
+  <div class="sql-container">
+
+    <!-- ===== SQL PLAYGROUND ===== -->
+    <div class="sql-playground reveal" id="sql-playground">
+      <h2>🧪 SQL Playground</h2>
+      <p class="playground-desc">Write and run SQL queries right here in your browser! The playground uses a SQLite database with sample tables.</p>
+
+      <div class="loading-sql" id="sql-loading">
+        <span class="dot-pulse"></span> Loading SQL engine...
+      </div>
+
+      <div class="sql-editor-wrapper">
+        <textarea class="sql-editor" id="playground-editor" placeholder="-- Type your SQL query here...&#10;SELECT * FROM students;" spellcheck="false"></textarea>
+        <div class="sql-btn-row">
+          <button class="sql-run-btn" onclick="runPlaygroundSQL()">▶ Run Query</button>
+          <button class="sql-clear-btn" onclick="clearPlayground()">Clear</button>
+          <button class="sql-reset-btn" onclick="resetDatabase()">🔄 Reset Database</button>
+        </div>
+        <div class="sql-output" id="playground-output">
+          <span class="sql-output-label">Output</span>
+          <span class="info-msg">Run a query to see results here.</span>
+        </div>
+      </div>
+
+      <div class="db-schema">
+        <h4>📋 Sample Database Schema</h4>
+        <code>students (id, name, age, section, department)
+courses  (id, course_name, credits, instructor)
+marks    (id, student_id, course_id, marks, grade)</code>
+      </div>
+    </div>
+
+    <!-- ===== LESSONS ===== -->
+
+    <!-- Lesson 1: Introduction -->
+    <div class="sql-lesson reveal" id="lesson-1">
+      <div class="sql-lesson-header" onclick="toggleLesson(this)">
+        <h3><span class="sql-lesson-num">1</span> Introduction to SQL</h3>
+        <span class="sql-lesson-toggle">▼</span>
+      </div>
+      <div class="sql-lesson-content">
+        <div class="sql-lesson-body">
+          <p><strong>SQL (Structured Query Language)</strong> is the standard language for interacting with relational databases. It lets you create, read, update, and delete data stored in tables.</p>
+          <p>A <strong>relational database</strong> stores data in tables (like spreadsheets) with rows and columns. Each table has a name, and each column has a data type (e.g., INTEGER, TEXT, REAL).</p>
+          <p>SQL is used everywhere — from small apps to massive enterprise systems. Every data scientist, analyst, and engineer needs to know SQL.</p>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — View all tables</span>
+            <code>SELECT name FROM sqlite_master WHERE type='table';</code>
+          </div>
+          <div class="try-it-box">
+            <div class="try-it-label">🧪 Try it yourself</div>
+            <textarea id="try-1" placeholder="SELECT name FROM sqlite_master WHERE type='table';">SELECT name FROM sqlite_master WHERE type='table';</textarea>
+            <button class="sql-run-btn" onclick="runTryIt(1)">▶ Run</button>
+            <div class="try-it-output sql-output" id="try-output-1"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lesson 2: SELECT -->
+    <div class="sql-lesson reveal" id="lesson-2">
+      <div class="sql-lesson-header" onclick="toggleLesson(this)">
+        <h3><span class="sql-lesson-num">2</span> SELECT Statement</h3>
+        <span class="sql-lesson-toggle">▼</span>
+      </div>
+      <div class="sql-lesson-content">
+        <div class="sql-lesson-body">
+          <p>The <strong>SELECT</strong> statement retrieves data from one or more tables. You can select specific columns or use <code>*</code> to select all columns.</p>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — Select all students</span>
+            <code>SELECT * FROM students;</code>
+          </div>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — Select specific columns</span>
+            <code>SELECT name, department FROM students;</code>
+          </div>
+          <div class="try-it-box">
+            <div class="try-it-label">🧪 Try it yourself</div>
+            <textarea id="try-2" placeholder="SELECT name, age FROM students;">SELECT name, age FROM students;</textarea>
+            <button class="sql-run-btn" onclick="runTryIt(2)">▶ Run</button>
+            <div class="try-it-output sql-output" id="try-output-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lesson 3: WHERE -->
+    <div class="sql-lesson reveal" id="lesson-3">
+      <div class="sql-lesson-header" onclick="toggleLesson(this)">
+        <h3><span class="sql-lesson-num">3</span> WHERE Clause</h3>
+        <span class="sql-lesson-toggle">▼</span>
+      </div>
+      <div class="sql-lesson-content">
+        <div class="sql-lesson-body">
+          <p>The <strong>WHERE</strong> clause filters rows based on conditions. You can use operators like <code>=</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>LIKE</code>, <code>IN</code>, <code>BETWEEN</code>, <code>AND</code>, <code>OR</code>.</p>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — Filter by department</span>
+            <code>SELECT * FROM students WHERE department = 'Computer Science';</code>
+          </div>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — Multiple conditions</span>
+            <code>SELECT * FROM students WHERE age > 20 AND section = 'A';</code>
+          </div>
+          <div class="try-it-box">
+            <div class="try-it-label">🧪 Try it yourself</div>
+            <textarea id="try-3" placeholder="SELECT * FROM students WHERE age >= 21;">SELECT * FROM students WHERE age >= 21;</textarea>
+            <button class="sql-run-btn" onclick="runTryIt(3)">▶ Run</button>
+            <div class="try-it-output sql-output" id="try-output-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lesson 4: ORDER BY -->
+    <div class="sql-lesson reveal" id="lesson-4">
+      <div class="sql-lesson-header" onclick="toggleLesson(this)">
+        <h3><span class="sql-lesson-num">4</span> ORDER BY</h3>
+        <span class="sql-lesson-toggle">▼</span>
+      </div>
+      <div class="sql-lesson-content">
+        <div class="sql-lesson-body">
+          <p><strong>ORDER BY</strong> sorts query results by one or more columns. Use <code>ASC</code> (default) for ascending or <code>DESC</code> for descending order.</p>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — Sort by name</span>
+            <code>SELECT * FROM students ORDER BY name ASC;</code>
+          </div>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — Sort by age descending</span>
+            <code>SELECT * FROM students ORDER BY age DESC;</code>
+          </div>
+          <div class="try-it-box">
+            <div class="try-it-label">🧪 Try it yourself</div>
+            <textarea id="try-4" placeholder="SELECT * FROM marks ORDER BY marks DESC;">SELECT * FROM marks ORDER BY marks DESC;</textarea>
+            <button class="sql-run-btn" onclick="runTryIt(4)">▶ Run</button>
+            <div class="try-it-output sql-output" id="try-output-4"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lesson 5: GROUP BY -->
+    <div class="sql-lesson reveal" id="lesson-5">
+      <div class="sql-lesson-header" onclick="toggleLesson(this)">
+        <h3><span class="sql-lesson-num">5</span> GROUP BY</h3>
+        <span class="sql-lesson-toggle">▼</span>
+      </div>
+      <div class="sql-lesson-content">
+        <div class="sql-lesson-body">
+          <p><strong>GROUP BY</strong> groups rows that have the same values in specified columns. It's typically used with aggregate functions like COUNT, SUM, AVG, MAX, MIN.</p>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — Count students per department</span>
+            <code>SELECT department, COUNT(*) as student_count
+FROM students
+GROUP BY department;</code>
+          </div>
+          <div class="try-it-box">
+            <div class="try-it-label">🧪 Try it yourself</div>
+            <textarea id="try-5" placeholder="SELECT section, COUNT(*) FROM students GROUP BY section;">SELECT section, COUNT(*) as count FROM students GROUP BY section;</textarea>
+            <button class="sql-run-btn" onclick="runTryIt(5)">▶ Run</button>
+            <div class="try-it-output sql-output" id="try-output-5"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lesson 6: JOINs -->
+    <div class="sql-lesson reveal" id="lesson-6">
+      <div class="sql-lesson-header" onclick="toggleLesson(this)">
+        <h3><span class="sql-lesson-num">6</span> JOINs</h3>
+        <span class="sql-lesson-toggle">▼</span>
+      </div>
+      <div class="sql-lesson-content">
+        <div class="sql-lesson-body">
+          <p><strong>JOIN</strong> combines rows from two or more tables based on a related column. Common types: <strong>INNER JOIN</strong> (only matching rows), <strong>LEFT JOIN</strong> (all from left + matches), <strong>RIGHT JOIN</strong>, <strong>FULL OUTER JOIN</strong>.</p>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — Join students with marks</span>
+            <code>SELECT s.name, c.course_name, m.marks, m.grade
+FROM marks m
+INNER JOIN students s ON m.student_id = s.id
+INNER JOIN courses c ON m.course_id = c.id;</code>
+          </div>
+          <div class="try-it-box">
+            <div class="try-it-label">🧪 Try it yourself</div>
+            <textarea id="try-6" placeholder="SELECT s.name, m.marks FROM marks m JOIN students s ON m.student_id = s.id;">SELECT s.name, c.course_name, m.marks
+FROM marks m
+JOIN students s ON m.student_id = s.id
+JOIN courses c ON m.course_id = c.id
+ORDER BY s.name;</textarea>
+            <button class="sql-run-btn" onclick="runTryIt(6)">▶ Run</button>
+            <div class="try-it-output sql-output" id="try-output-6"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lesson 7: Aggregate Functions -->
+    <div class="sql-lesson reveal" id="lesson-7">
+      <div class="sql-lesson-header" onclick="toggleLesson(this)">
+        <h3><span class="sql-lesson-num">7</span> Aggregate Functions</h3>
+        <span class="sql-lesson-toggle">▼</span>
+      </div>
+      <div class="sql-lesson-content">
+        <div class="sql-lesson-body">
+          <p><strong>Aggregate functions</strong> perform calculations on a set of rows and return a single value: <code>COUNT()</code>, <code>SUM()</code>, <code>AVG()</code>, <code>MAX()</code>, <code>MIN()</code>.</p>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — Average marks per course</span>
+            <code>SELECT c.course_name, AVG(m.marks) as avg_marks
+FROM marks m
+JOIN courses c ON m.course_id = c.id
+GROUP BY c.course_name;</code>
+          </div>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — Highest marks</span>
+            <code>SELECT MAX(marks) as highest, MIN(marks) as lowest FROM marks;</code>
+          </div>
+          <div class="try-it-box">
+            <div class="try-it-label">🧪 Try it yourself</div>
+            <textarea id="try-7" placeholder="SELECT AVG(marks) FROM marks;">SELECT COUNT(*) as total_records, AVG(marks) as average, MAX(marks) as best, MIN(marks) as worst FROM marks;</textarea>
+            <button class="sql-run-btn" onclick="runTryIt(7)">▶ Run</button>
+            <div class="try-it-output sql-output" id="try-output-7"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lesson 8: Subqueries -->
+    <div class="sql-lesson reveal" id="lesson-8">
+      <div class="sql-lesson-header" onclick="toggleLesson(this)">
+        <h3><span class="sql-lesson-num">8</span> Subqueries</h3>
+        <span class="sql-lesson-toggle">▼</span>
+      </div>
+      <div class="sql-lesson-content">
+        <div class="sql-lesson-body">
+          <p>A <strong>subquery</strong> is a query nested inside another query. It can appear in SELECT, FROM, or WHERE clauses. Subqueries are powerful for complex filtering and comparisons.</p>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — Students with above-average marks</span>
+            <code>SELECT s.name, m.marks
+FROM marks m
+JOIN students s ON m.student_id = s.id
+WHERE m.marks > (SELECT AVG(marks) FROM marks);</code>
+          </div>
+          <div class="try-it-box">
+            <div class="try-it-label">🧪 Try it yourself</div>
+            <textarea id="try-8" placeholder="-- Find students with the highest marks">SELECT s.name, m.marks
+FROM marks m
+JOIN students s ON m.student_id = s.id
+WHERE m.marks = (SELECT MAX(marks) FROM marks);</textarea>
+            <button class="sql-run-btn" onclick="runTryIt(8)">▶ Run</button>
+            <div class="try-it-output sql-output" id="try-output-8"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lesson 9: INSERT/UPDATE/DELETE -->
+    <div class="sql-lesson reveal" id="lesson-9">
+      <div class="sql-lesson-header" onclick="toggleLesson(this)">
+        <h3><span class="sql-lesson-num">9</span> INSERT / UPDATE / DELETE</h3>
+        <span class="sql-lesson-toggle">▼</span>
+      </div>
+      <div class="sql-lesson-content">
+        <div class="sql-lesson-body">
+          <p>These statements <strong>modify</strong> data. <code>INSERT</code> adds new rows, <code>UPDATE</code> changes existing rows, and <code>DELETE</code> removes rows. Always be careful with UPDATE and DELETE — use WHERE to target specific rows!</p>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — Insert a student</span>
+            <code>INSERT INTO students (name, age, section, department)
+VALUES ('Hermione', 22, 'A', 'Computer Science');</code>
+          </div>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — Update marks</span>
+            <code>UPDATE marks SET marks = 95 WHERE student_id = 1 AND course_id = 1;</code>
+          </div>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — Delete a record</span>
+            <code>DELETE FROM students WHERE name = 'Hermione';</code>
+          </div>
+          <div class="try-it-box">
+            <div class="try-it-label">🧪 Try it yourself (changes persist until you reset the database)</div>
+            <textarea id="try-9" placeholder="INSERT INTO students (name, age, section, department) VALUES ('TestStudent', 20, 'B', 'Data Science');">INSERT INTO students (name, age, section, department) VALUES ('TestStudent', 20, 'B', 'Data Science');
+-- Then run: SELECT * FROM students;</textarea>
+            <button class="sql-run-btn" onclick="runTryIt(9)">▶ Run</button>
+            <div class="try-it-output sql-output" id="try-output-9"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lesson 10: CREATE TABLE -->
+    <div class="sql-lesson reveal" id="lesson-10">
+      <div class="sql-lesson-header" onclick="toggleLesson(this)">
+        <h3><span class="sql-lesson-num">10</span> CREATE TABLE</h3>
+        <span class="sql-lesson-toggle">▼</span>
+      </div>
+      <div class="sql-lesson-content">
+        <div class="sql-lesson-body">
+          <p><strong>CREATE TABLE</strong> defines a new table with column names and data types. You can add constraints like <code>PRIMARY KEY</code>, <code>NOT NULL</code>, <code>UNIQUE</code>, and <code>FOREIGN KEY</code>.</p>
+          <div class="sql-example">
+            <span class="sql-example-label">Example — Create a projects table</span>
+            <code>CREATE TABLE projects (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  student_id INTEGER,
+  status TEXT DEFAULT 'in-progress',
+  FOREIGN KEY (student_id) REFERENCES students(id)
+);</code>
+          </div>
+          <div class="try-it-box">
+            <div class="try-it-label">🧪 Try it yourself</div>
+            <textarea id="try-10" placeholder="CREATE TABLE my_table (id INTEGER PRIMARY KEY, name TEXT);">CREATE TABLE IF NOT EXISTS projects (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  student_id INTEGER
+);
+-- Then run: SELECT name FROM sqlite_master WHERE type='table';</textarea>
+            <button class="sql-run-btn" onclick="runTryIt(10)">▶ Run</button>
+            <div class="try-it-output sql-output" id="try-output-10"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-wand">⚡🪄⚡</div>
+    <p class="footer-line"><span>P.M.Swetha Shree</span> · Data Science – Digital Library</p>
+    <p class="footer-line" style="font-size:0.75rem; margin-top:0.3rem;">Crafted with ✨ magic</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+
+  <!-- sql.js — SQLite compiled to WebAssembly -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+
+  <script>
+    let db = null;
+
+    // Initialize sql.js and create sample database
+    async function initSQL() {
+      const loading = document.getElementById('sql-loading');
+      try {
+        const SQL = await initSqlJs({
+          locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+        });
+        db = new SQL.Database();
+        createSampleDB();
+        if (loading) loading.style.display = 'none';
+      } catch (err) {
+        if (loading) loading.innerHTML = '<span style="color:#f44747;">Failed to load SQL engine: ' + err.message + '</span>';
+        console.error('sql.js init error:', err);
+      }
+    }
+
+    function createSampleDB() {
+      if (!db) return;
+      db.run(`
+        CREATE TABLE IF NOT EXISTS students (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          age INTEGER,
+          section TEXT,
+          department TEXT
+        );
+      `);
+      db.run(`
+        CREATE TABLE IF NOT EXISTS courses (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          course_name TEXT NOT NULL,
+          credits INTEGER,
+          instructor TEXT
+        );
+      `);
+      db.run(`
+        CREATE TABLE IF NOT EXISTS marks (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          student_id INTEGER,
+          course_id INTEGER,
+          marks INTEGER,
+          grade TEXT,
+          FOREIGN KEY (student_id) REFERENCES students(id),
+          FOREIGN KEY (course_id) REFERENCES courses(id)
+        );
+      `);
+
+      // Insert sample data
+      db.run(`INSERT INTO students (name, age, section, department) VALUES
+        ('Alice', 21, 'A', 'Computer Science'),
+        ('Bob', 22, 'B', 'Computer Science'),
+        ('Charlie', 20, 'A', 'Data Science'),
+        ('Diana', 23, 'B', 'Data Science'),
+        ('Eve', 21, 'A', 'Computer Science'),
+        ('Frank', 22, 'A', 'Information Technology'),
+        ('Grace', 20, 'B', 'Data Science'),
+        ('Hank', 23, 'B', 'Information Technology');
+      `);
+
+      db.run(`INSERT INTO courses (course_name, credits, instructor) VALUES
+        ('Data Science', 4, 'Prof. Smith'),
+        ('Machine Learning', 4, 'Prof. Johnson'),
+        ('Database Systems', 3, 'Prof. Williams'),
+        ('Statistics', 3, 'Prof. Brown'),
+        ('Python Programming', 3, 'Prof. Davis');
+      `);
+
+      db.run(`INSERT INTO marks (student_id, course_id, marks, grade) VALUES
+        (1, 1, 92, 'A'), (1, 2, 88, 'A'), (1, 3, 95, 'A+'),
+        (2, 1, 78, 'B+'), (2, 2, 82, 'A'), (2, 4, 71, 'B'),
+        (3, 1, 95, 'A+'), (3, 3, 89, 'A'), (3, 5, 93, 'A'),
+        (4, 2, 68, 'B'), (4, 4, 75, 'B+'), (4, 5, 84, 'A'),
+        (5, 1, 85, 'A'), (5, 3, 91, 'A'), (5, 5, 88, 'A'),
+        (6, 2, 73, 'B'), (6, 4, 80, 'A'), (6, 1, 69, 'B'),
+        (7, 3, 96, 'A+'), (7, 5, 90, 'A'), (7, 1, 87, 'A'),
+        (8, 4, 62, 'B'), (8, 2, 77, 'B+'), (8, 3, 81, 'A');
+      `);
+    }
+
+    function executeSQL(query) {
+      if (!db) return { error: 'SQL engine not loaded yet. Please wait...' };
+      try {
+        const results = db.exec(query);
+        return { results: results };
+      } catch (err) {
+        return { error: err.message };
+      }
+    }
+
+    function renderSQLResults(containerId, result) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      if (result.error) {
+        container.innerHTML = '<span class="error-msg">❌ ' + escapeHTML(result.error) + '</span>';
+        return;
+      }
+
+      if (!result.results || result.results.length === 0) {
+        container.innerHTML = '<span class="success-msg">✓ Query executed successfully (no rows returned).</span>';
+        return;
+      }
+
+      let html = '';
+      result.results.forEach(res => {
+        html += '<table><thead><tr>';
+        res.columns.forEach(col => { html += '<th>' + escapeHTML(col) + '</th>'; });
+        html += '</tr></thead><tbody>';
+        res.values.forEach(row => {
+          html += '<tr>';
+          row.forEach(val => { html += '<td>' + (val === null ? '<em>NULL</em>' : escapeHTML(String(val))) + '</td>'; });
+          html += '</tr>';
+        });
+        html += '</tbody></table>';
+      });
+
+      container.innerHTML = html;
+    }
+
+    function runPlaygroundSQL() {
+      const editor = document.getElementById('playground-editor');
+      const query = editor.value.trim();
+      if (!query) return;
+      const result = executeSQL(query);
+      renderSQLResults('playground-output', result);
+    }
+
+    function clearPlayground() {
+      document.getElementById('playground-editor').value = '';
+      document.getElementById('playground-output').innerHTML =
+        '<span class="sql-output-label">Output</span><span class="info-msg">Run a query to see results here.</span>';
+    }
+
+    function resetDatabase() {
+      if (db) {
+        db.close();
+        const SQL = db.constructor;
+        // Re-create from scratch
+        initSQL().then(() => {
+          document.getElementById('playground-output').innerHTML =
+            '<span class="sql-output-label">Output</span><span class="success-msg">✓ Database reset to initial state.</span>';
+        });
+      }
+    }
+
+    function runTryIt(num) {
+      const editor = document.getElementById('try-' + num);
+      const query = editor.value.trim();
+      if (!query) return;
+      const result = executeSQL(query);
+      renderSQLResults('try-output-' + num, result);
+    }
+
+    function toggleLesson(el) {
+      const lesson = el.closest('.sql-lesson');
+      if (lesson) lesson.classList.toggle('open');
+    }
+
+    function escapeHTML(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // Keyboard shortcut: Ctrl+Enter to run playground
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        const active = document.activeElement;
+        if (active && active.id === 'playground-editor') {
+          e.preventDefault();
+          runPlaygroundSQL();
+        }
+      }
+    });
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', initSQL);
+  </script>
+</body>
+</html>
