@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <rect width="80" height="80" rx="10" fill="#1A1A2E"/>
+  <rect x="2" y="2" width="76" height="76" rx="9" fill="none" stroke="#D3A625" stroke-width="2"/>
+  <text x="40" y="35" text-anchor="middle" font-family="serif" font-size="12" fill="#D3A625" font-weight="bold">COLLEGE</text>
+  <text x="40" y="52" text-anchor="middle" font-family="serif" font-size="12" fill="#D3A625" font-weight="bold">LOGO</text>
+  <text x="40" y="67" text-anchor="middle" font-size="14">🎓</text>
+</svg>
