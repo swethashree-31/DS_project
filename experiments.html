@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Data Science Lab Experiments - Download lab programs with built-in Python interpreter for hands-on learning.">
+  <title>Experiments - Data Science Digital Library</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1FA84;</text></svg>">
+  <style>
+    .unit-section { margin-bottom: 2.5rem; }
+    .unit-title { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.2rem; padding-bottom: 0.6rem; border-bottom: 2px solid rgba(211,166,37,0.2); }
+    .unit-title h2 { font-size: 1.4rem; color: #D3A625; margin: 0; }
+    .unit-badge { background: linear-gradient(135deg, rgba(116,0,1,0.4), rgba(211,166,37,0.2)); color: #D3A625; padding: 0.25rem 0.7rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(211,166,37,0.3); }
+
+    .experiments-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem; padding: 1rem 1.5rem; background: linear-gradient(135deg, rgba(20,10,40,0.6), rgba(30,15,50,0.4)); border: 1px solid rgba(211,166,37,0.12); border-radius: 12px; }
+    .stat-item { display: flex; align-items: center; gap: 0.5rem; }
+    .stat-number { font-size: 1.4rem; font-weight: 800; color: #D3A625; }
+    .stat-label { font-size: 0.8rem; color: rgba(232,213,163,0.6); text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* Experiment card */
+    .exp-card { background: linear-gradient(145deg, rgba(20,10,40,0.8), rgba(30,15,50,0.6)); border: 1px solid rgba(211,166,37,0.12); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; transition: all 0.4s ease; }
+    .exp-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #D3A625, transparent); opacity: 0; transition: opacity 0.4s ease; }
+    .exp-card:hover::before { opacity: 1; }
+    .exp-card:hover { border-color: rgba(211,166,37,0.3); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+
+    .exp-card-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .exp-card-title-area { display: flex; align-items: center; gap: 0.7rem; flex: 1; }
+    .exp-number { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, rgba(211,166,37,0.2), rgba(116,0,1,0.3)); border: 1px solid rgba(211,166,37,0.3); color: #D3A625; font-weight: 800; font-size: 1.1rem; flex-shrink: 0; }
+    .exp-card-title { font-size: 1.15rem; color: #e8d5a3; font-weight: 700; line-height: 1.3; }
+
+    .exp-btn-group { display: flex; gap: 0.5rem; flex-shrink: 0; }
+    .exp-download-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1.1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; border: 1px solid rgba(211,166,37,0.3); background: linear-gradient(135deg, rgba(211,166,37,0.25), rgba(116,0,1,0.3)); color: #D3A625; }
+    .exp-download-btn:hover { background: linear-gradient(135deg, rgba(211,166,37,0.4), rgba(116,0,1,0.4)); border-color: rgba(211,166,37,0.5); transform: translateY(-1px); box-shadow: 0 4px 15px rgba(211,166,37,0.15); }
+    .exp-view-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1.1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; border: 1px solid rgba(41,98,255,0.3); background: linear-gradient(135deg, rgba(41,98,255,0.15), rgba(41,98,255,0.05)); color: #6e9eff; }
+    .exp-view-btn:hover { background: linear-gradient(135deg, rgba(41,98,255,0.3), rgba(41,98,255,0.15)); border-color: rgba(41,98,255,0.5); transform: translateY(-1px); }
+    .exp-file-badge { display: inline-flex; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: rgba(41,98,255,0.15); color: #6e9eff; border: 1px solid rgba(41,98,255,0.3); margin-left: 0.5rem; }
+
+    /* Sub-parts */
+    .sub-parts { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.6rem; margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(211,166,37,0.08); }
+    .sub-part { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 0.8rem; border-radius: 8px; background: rgba(211,166,37,0.04); border: 1px solid rgba(211,166,37,0.06); transition: all 0.3s ease; }
+    .sub-part:hover { background: rgba(211,166,37,0.08); border-color: rgba(211,166,37,0.15); }
+    .sub-label { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; padding: 0 4px; border-radius: 6px; background: linear-gradient(135deg, rgba(211,166,37,0.15), rgba(116,0,1,0.2)); border: 1px solid rgba(211,166,37,0.2); color: #D3A625; font-size: 0.7rem; font-weight: 800; flex-shrink: 0; }
+    .sub-text { font-size: 0.85rem; color: rgba(232,213,163,0.75); line-height: 1.3; }
+
+    /* Colab link */
+    .colab-link-section { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(211,166,37,0.08); }
+    .colab-link { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.45rem 1rem; border-radius: 8px; font-size: 0.82rem; font-weight: 600; color: #ffa726; border: 1px solid rgba(255,167,38,0.3); background: linear-gradient(135deg, rgba(255,167,38,0.12), rgba(255,167,38,0.04)); text-decoration: none; transition: all 0.3s ease; }
+    .colab-link:hover { background: linear-gradient(135deg, rgba(255,167,38,0.25), rgba(255,167,38,0.1)); border-color: rgba(255,167,38,0.5); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,167,38,0.15); color: #ffcc80; }
+
+    /* ===== Python Interpreter ===== */
+    .interpreter-section { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(211,166,37,0.08); }
+    .interpreter-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem; }
+    .interpreter-title { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; font-weight: 700; color: #4ec9b0; text-transform: uppercase; letter-spacing: 0.04em; }
+    .interpreter-actions { display: flex; gap: 0.4rem; }
+
+    .run-btn { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: 1px solid rgba(78,201,176,0.4); background: linear-gradient(135deg, rgba(78,201,176,0.2), rgba(78,201,176,0.08)); color: #4ec9b0; transition: all 0.3s ease; }
+    .run-btn:hover { background: linear-gradient(135deg, rgba(78,201,176,0.35), rgba(78,201,176,0.15)); box-shadow: 0 2px 10px rgba(78,201,176,0.2); transform: translateY(-1px); }
+    .run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .clear-btn { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid rgba(232,213,163,0.15); background: rgba(232,213,163,0.05); color: rgba(232,213,163,0.5); transition: all 0.3s ease; }
+    .clear-btn:hover { background: rgba(232,213,163,0.1); color: rgba(232,213,163,0.8); }
+
+    .code-editor { width: 100%; min-height: 150px; max-height: 400px; padding: 1rem; border-radius: 8px; border: 1px solid rgba(78,201,176,0.15); background: rgba(0,0,0,0.4); color: #d4d4d4; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.85rem; line-height: 1.6; resize: vertical; outline: none; transition: border-color 0.3s ease; tab-size: 4; }
+    .code-editor:focus { border-color: rgba(78,201,176,0.4); box-shadow: 0 0 10px rgba(78,201,176,0.08); }
+    .code-editor::placeholder { color: rgba(232,213,163,0.3); }
+
+    .output-area { margin-top: 0.5rem; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid rgba(211,166,37,0.1); background: rgba(0,0,0,0.5); font-family: 'Consolas', 'Courier New', monospace; font-size: 0.82rem; line-height: 1.5; color: #d4d4d4; min-height: 40px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; display: none; }
+    .output-area.has-output { display: block; }
+    .output-area .output-label { color: rgba(78,201,176,0.6); font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; display: block; }
+    .output-area .error { color: #f44747; }
+    .output-area .success { color: #4ec9b0; }
+
+    .pyodide-status { display: flex; align-items: center; gap: 0.3rem; font-size: 0.7rem; color: rgba(232,213,163,0.4); }
+    .pyodide-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(232,213,163,0.3); }
+    .pyodide-dot.ready { background: #4ec9b0; }
+    .pyodide-dot.loading { background: #D3A625; animation: pulse 1s ease infinite; }
+    @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+    /* ===== CODE RUNNER SECTION ===== */
+    .code-runner-section {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto 2rem;
+      padding: 0 2rem;
+    }
+
+    .code-runner-card {
+      background: linear-gradient(145deg, rgba(20,10,40,0.85), rgba(30,15,50,0.7));
+      border: 1px solid rgba(211,166,37,0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      overflow: hidden;
+    }
+
+    .code-runner-card h2 {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      color: #D3A625;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .runner-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid rgba(211,166,37,0.15);
+      overflow-x: auto;
+    }
+
+    .runner-tab {
+      padding: 0.6rem 1.3rem;
+      font-family: var(--font-subheading);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: rgba(232,213,163,0.6);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .runner-tab:hover { color: #D3A625; }
+    .runner-tab.active { color: #D3A625; border-bottom-color: #D3A625; }
+
+    .runner-panel { display: none; }
+    .runner-panel.active { display: block; }
+
+    .runner-panel .runner-editor {
+      width: 100%;
+      min-height: 180px;
+      max-height: 400px;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid rgba(78,201,176,0.15);
+      background: rgba(0,0,0,0.5);
+      color: #d4d4d4;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      tab-size: 4;
+    }
+
+    .runner-panel .runner-editor:focus {
+      border-color: rgba(78,201,176,0.4);
+      box-shadow: 0 0 10px rgba(78,201,176,0.08);
+    }
+
+    .runner-btn-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .runner-output {
+      margin-top: 0.6rem;
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      border: 1px solid rgba(211,166,37,0.1);
+      background: rgba(0,0,0,0.5);
+      min-height: 50px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Consolas', monospace;
+      font-size: 0.83rem;
+      color: #d4d4d4;
+      white-space: pre-wrap;
+    }
+
+    .runner-output .output-label { color: rgba(78,201,176,0.6); font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; display: block; }
+
+    .pytorch-note {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .pytorch-note p {
+      color: rgba(232,213,163,0.7);
+      font-size: 0.92rem;
+      max-width: 500px;
+    }
+
+    .colab-open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.7rem 1.8rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid rgba(255,167,38,0.5);
+      background: linear-gradient(135deg, rgba(255,167,38,0.2), rgba(255,167,38,0.08));
+      color: #ffa726;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .colab-open-btn:hover {
+      background: linear-gradient(135deg, rgba(255,167,38,0.35), rgba(255,167,38,0.15));
+      box-shadow: 0 4px 15px rgba(255,167,38,0.2);
+      transform: translateY(-2px);
+      color: #ffcc80;
+    }
+
+    .runner-input-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      align-items: center;
+    }
+
+    .runner-stdin {
+      flex: 1;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      border: 1px solid rgba(232,213,163,0.15);
+      background: rgba(0,0,0,0.3);
+      color: #d4d4d4;
+      font-family: 'Consolas', monospace;
+      font-size: 0.82rem;
+      outline: none;
+    }
+
+    .runner-stdin:focus { border-color: rgba(78,201,176,0.3); }
+
+    /* Fullscreen viewer modal */
+    .doc-fullscreen-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 10000; padding: 1rem; box-sizing: border-box; }
+    .doc-fullscreen-overlay.active { display: flex; flex-direction: column; }
+    .doc-fullscreen-header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; margin-bottom: 0.5rem; }
+    .doc-fullscreen-header h3 { color: #D3A625; font-size: 1rem; margin: 0; }
+    .doc-fullscreen-close { background: rgba(211,166,37,0.2); border: 1px solid rgba(211,166,37,0.4); color: #D3A625; padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.3s ease; }
+    .doc-fullscreen-close:hover { background: rgba(211,166,37,0.35); }
+    .doc-fullscreen-body { flex: 1; border-radius: 8px; overflow: hidden; position: relative; }
+    .doc-fullscreen-body iframe { width: 100%; height: 100%; border: none; background: #1a1a2e; }
+    .doc-rendered-content { width: 100%; height: 100%; overflow-y: auto; padding: 2rem; box-sizing: border-box; background: #1e1e2e; color: #d4d4d4; font-family: 'Segoe UI', sans-serif; font-size: 0.95rem; line-height: 1.7; }
+    .doc-rendered-content h1, .doc-rendered-content h2, .doc-rendered-content h3 { color: #D3A625; margin-top: 1.2rem; }
+    .doc-rendered-content p { margin: 0.5rem 0; }
+    .doc-rendered-content table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    .doc-rendered-content td, .doc-rendered-content th { border: 1px solid rgba(211,166,37,0.2); padding: 0.5rem; }
+    .doc-rendered-content code { background: rgba(0,0,0,0.4); padding: 0.15rem 0.4rem; border-radius: 4px; font-family: Consolas, monospace; color: #4ec9b0; }
+    .doc-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #D3A625; font-size: 1rem; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 0.8rem; }
+    .doc-loading-spinner { width: 36px; height: 36px; border: 3px solid rgba(211,166,37,0.2); border-top-color: #D3A625; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 768px) {
+      .sub-parts { grid-template-columns: 1fr; }
+      .exp-card-header { flex-direction: column; align-items: flex-start; }
+      .exp-btn-group { width: 100%; }
+      .exp-btn-group a, .exp-btn-group button { flex: 1; justify-content: center; }
+      .interpreter-header { flex-direction: column; align-items: flex-start; }
+      .code-runner-section { padding: 0 1rem; }
+      .runner-tabs { gap: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="page-load-overlay" class="page-load-overlay">
+    <span class="wand-icon">&#x1FA84;&#x2728;</span>
+  </div>
+  <div id="magical-bg"></div>
+
+  <nav class="navbar" role="navigation" aria-label="Main Navigation">
+    <a href="index.html" class="brand">
+      <img src="images/college-logo.png" alt="College Logo" class="nav-logo">
+      Digital Library
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="modules.html">Modules</a></li>
+      <li><a href="experiments.html" class="active">Experiments</a></li>
+      <li><a href="tools.html">Tools</a></li>
+      <li><a href="resources.html">Resources</a></li>
+      <li><a href="projects.html">Projects</a></li>
+    </ul>
+    <a href="about.html" class="nav-profile-pic" title="About Me">
+      <img src="images/profile.jpeg" alt="Profile" id="nav-profile-img">
+    </a>
+  </nav>
+
+  <section class="page-header">
+    <h1>&#x1F9EA; Lab Experiments</h1>
+    <p>"The best way to learn magic is to practice it."</p>
+    <div class="divider"><span>&#x26A1;</span></div>
+  </section>
+
+  <!-- ===== ONLINE CODE RUNNER ===== -->
+  <div class="code-runner-section">
+    <div class="code-runner-card reveal">
+      <h2>💻 Online Code Runner</h2>
+      <div class="runner-tabs">
+        <button class="runner-tab active" onclick="switchRunnerTab('python')">🐍 Python</button>
+        <button class="runner-tab" onclick="switchRunnerTab('c')">⚙️ C</button>
+        <button class="runner-tab" onclick="switchRunnerTab('cpp')">⚙️ C++</button>
+        <button class="runner-tab" onclick="switchRunnerTab('java')">☕ Java</button>
+        <button class="runner-tab" onclick="switchRunnerTab('pytorch')">🔥 PyTorch</button>
+      </div>
+
+      <!-- Python Panel -->
+      <div class="runner-panel active" id="runner-python">
+        <textarea class="runner-editor" id="runner-code-python" placeholder="# Write Python code here..." spellcheck="false">print("Hello, Data Science!")
+import numpy as np
+arr = np.array([1, 2, 3, 4, 5])
+print("NumPy array:", arr)
+print("Mean:", np.mean(arr))</textarea>
+        <div class="runner-btn-row">
+          <button class="run-btn" onclick="runRunnerPython()">▶ Run Python</button>
+          <button class="clear-btn" onclick="clearRunner('python')">Clear</button>
+          <span class="pyodide-status"><span class="pyodide-dot" id="pyodide-indicator"></span> <span id="pyodide-status-text">Python Loading...</span></span>
+        </div>
+        <div class="runner-output" id="runner-output-python">
+          <span class="output-label">Output</span>
+          <span id="runner-result-python" style="color:rgba(232,213,163,0.5);">Run code to see output...</span>
+        </div>
+      </div>
+
+      <!-- C Panel -->
+      <div class="runner-panel" id="runner-c">
+        <textarea class="runner-editor" id="runner-code-c" placeholder="// Write C code here..." spellcheck="false">#include <stdio.h>
+
+int main() {
+    printf("Hello from C!\n");
+    int sum = 0;
+    for (int i = 1; i <= 10; i++) sum += i;
+    printf("Sum of 1 to 10 = %d\n", sum);
+    return 0;
+}</textarea>
+        <div class="runner-input-row">
+          <span style="font-size:0.78rem; color:rgba(232,213,163,0.5);">stdin:</span>
+          <input type="text" class="runner-stdin" id="runner-stdin-c" placeholder="Optional input for your program...">
+        </div>
+        <div class="runner-btn-row">
+          <button class="run-btn" onclick="runJudge0('c', 50)">▶ Run C</button>
+          <button class="clear-btn" onclick="clearRunner('c')">Clear</button>
+        </div>
+        <div class="runner-output" id="runner-output-c">
+          <span class="output-label">Output</span>
+          <span id="runner-result-c" style="color:rgba(232,213,163,0.5);">Run code to see output...</span>
+        </div>
+      </div>
+
+      <!-- C++ Panel -->
+      <div class="runner-panel" id="runner-cpp">
+        <textarea class="runner-editor" id="runner-code-cpp" placeholder="// Write C++ code here..." spellcheck="false">#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+int main() {
+    vector<int> v = {10, 20, 30, 40, 50};
+    int total = accumulate(v.begin(), v.end(), 0);
+    cout << "Hello from C++!" << endl;
+    cout << "Sum = " << total << endl;
+    return 0;
+}</textarea>
+        <div class="runner-input-row">
+          <span style="font-size:0.78rem; color:rgba(232,213,163,0.5);">stdin:</span>
+          <input type="text" class="runner-stdin" id="runner-stdin-cpp" placeholder="Optional input for your program...">
+        </div>
+        <div class="runner-btn-row">
+          <button class="run-btn" onclick="runJudge0('cpp', 54)">▶ Run C++</button>
+          <button class="clear-btn" onclick="clearRunner('cpp')">Clear</button>
+        </div>
+        <div class="runner-output" id="runner-output-cpp">
+          <span class="output-label">Output</span>
+          <span id="runner-result-cpp" style="color:rgba(232,213,163,0.5);">Run code to see output...</span>
+        </div>
+      </div>
+
+      <!-- Java Panel -->
+      <div class="runner-panel" id="runner-java">
+        <textarea class="runner-editor" id="runner-code-java" placeholder="// Write Java code here..." spellcheck="false">public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello from Java!");
+        int[] nums = {1, 2, 3, 4, 5};
+        int sum = 0;
+        for (int n : nums) sum += n;
+        System.out.println("Sum = " + sum);
+    }
+}</textarea>
+        <div class="runner-input-row">
+          <span style="font-size:0.78rem; color:rgba(232,213,163,0.5);">stdin:</span>
+          <input type="text" class="runner-stdin" id="runner-stdin-java" placeholder="Optional input for your program...">
+        </div>
+        <div class="runner-btn-row">
+          <button class="run-btn" onclick="runJudge0('java', 62)">▶ Run Java</button>
+          <button class="clear-btn" onclick="clearRunner('java')">Clear</button>
+        </div>
+        <div class="runner-output" id="runner-output-java">
+          <span class="output-label">Output</span>
+          <span id="runner-result-java" style="color:rgba(232,213,163,0.5);">Run code to see output...</span>
+        </div>
+      </div>
+
+      <!-- PyTorch Panel -->
+      <div class="runner-panel" id="runner-pytorch">
+        <div class="pytorch-note">
+          <span style="font-size:3rem;">🔥</span>
+          <h3 style="color:#D3A625;">PyTorch</h3>
+          <p>PyTorch requires GPU/CUDA support and cannot run directly in the browser. Use <strong>Google Colab</strong> for free GPU-accelerated PyTorch notebooks.</p>
+          <a href="https://colab.research.google.com/" target="_blank" class="colab-open-btn">
+            📓 Open Google Colab
+          </a>
+          <p style="font-size:0.8rem; opacity:0.5; margin-top:0.5rem;">Opens in a new tab → sign in with your Google account → start coding with PyTorch!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="experiments-container">
+
+    <div class="experiments-stats reveal">
+      <div class="stat-item">
+        <span class="stat-number">10</span>
+        <span class="stat-label">Programs</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">10</span>
+        <span class="stat-label">DOCX Files</span>
+      </div>
+    </div>
+
+    <div class="unit-section">
+      <div class="unit-title reveal">
+        <h2>&#x1F4D9; Lab Experiments</h2>
+        <span class="unit-badge">10 Programs</span>
+      </div>
+
+      <!-- Program 1 -->
+      <div class="exp-card reveal" id="prog-1">
+        <div class="exp-card-header">
+          <div class="exp-card-title-area">
+            <div class="exp-number">1</div>
+            <div class="exp-card-title">Working with Different Data Formats using Pandas</div>
+            <span class="exp-file-badge">DOCX</span>
+          </div>
+          <div class="exp-btn-group">
+            <button onclick="viewDoc('experiments_zip/DS Programs/DataScience_Program1.docx','Program 1 - Data Formats')" class="exp-view-btn">&#x1F441; View</button>
+            <a href="experiments_zip/DS Programs/DataScience_Program1.docx" download class="exp-download-btn">&#x2B07; Download</a>
+          </div>
+        </div>
+        <div class="sub-parts">
+          <div class="sub-part"><span class="sub-label">1a</span><span class="sub-text">Reading and Writing CSV Data</span></div>
+          <div class="sub-part"><span class="sub-label">1b</span><span class="sub-text">Reading and Writing JSON Data</span></div>
+          <div class="sub-part"><span class="sub-label">1c</span><span class="sub-text">Reading and Writing Excel Files</span></div>
+        </div>
+        <div class="colab-link-section">
+          <a class="colab-link" id="colab-link-1" href="#" target="_blank">📓 <span id="colab-label-1"></span></a>
+        </div>
+        <div class="interpreter-section">
+          <div class="interpreter-header">
+            <div class="interpreter-title">&#x1F40D; Python Interpreter</div>
+            <div class="interpreter-actions">
+              <button class="run-btn" onclick="runCode(1)">&#x25B6; Run</button>
+              <button class="clear-btn" onclick="clearCode(1)">Clear</button>
+            </div>
+          </div>
+          <textarea class="code-editor" id="code-1" placeholder="# Paste your Python code here and click Run...&#10;import pandas as pd&#10;print('Hello from Program 1!')" spellcheck="false"></textarea>
+          <div class="output-area" id="output-1"><span class="output-label">Output</span><span id="output-text-1"></span></div>
+        </div>
+      </div>
+
+      <!-- Program 2 -->
+      <div class="exp-card reveal" id="prog-2">
+        <div class="exp-card-header">
+          <div class="exp-card-title-area">
+            <div class="exp-number">2</div>
+            <div class="exp-card-title">Interacting with Web APIs and Databases</div>
+            <span class="exp-file-badge">DOCX</span>
+          </div>
+          <div class="exp-btn-group">
+            <button onclick="viewDoc('experiments_zip/DS Programs/DataScience_Program2.docx','Program 2 - Web APIs')" class="exp-view-btn">&#x1F441; View</button>
+            <a href="experiments_zip/DS Programs/DataScience_Program2.docx" download class="exp-download-btn">&#x2B07; Download</a>
+          </div>
+        </div>
+        <div class="sub-parts">
+          <div class="sub-part"><span class="sub-label">2a</span><span class="sub-text">GitHub Issues to DataFrame</span></div>
+          <div class="sub-part"><span class="sub-label">2b</span><span class="sub-text">SQLite Database Operations</span></div>
+        </div>
+        <div class="colab-link-section">
+          <a class="colab-link" id="colab-link-2" href="#" target="_blank">📓 <span id="colab-label-2"></span></a>
+        </div>
+        <div class="interpreter-section">
+          <div class="interpreter-header">
+            <div class="interpreter-title">&#x1F40D; Python Interpreter</div>
+            <div class="interpreter-actions">
+              <button class="run-btn" onclick="runCode(2)">&#x25B6; Run</button>
+              <button class="clear-btn" onclick="clearCode(2)">Clear</button>
+            </div>
+          </div>
+          <textarea class="code-editor" id="code-2" placeholder="# Paste your Python code here and click Run..." spellcheck="false"></textarea>
+          <div class="output-area" id="output-2"><span class="output-label">Output</span><span id="output-text-2"></span></div>
+        </div>
+      </div>
+
+      <!-- Program 3 -->
+      <div class="exp-card reveal" id="prog-3">
+        <div class="exp-card-header">
+          <div class="exp-card-title-area">
+            <div class="exp-number">3</div>
+            <div class="exp-card-title">Data Cleaning and Preparation</div>
+            <span class="exp-file-badge">DOCX</span>
+          </div>
+          <div class="exp-btn-group">
+            <button onclick="viewDoc('experiments_zip/DS Programs/DataScience_Program3.docx','Program 3 - Data Cleaning')" class="exp-view-btn">&#x1F441; View</button>
+            <a href="experiments_zip/DS Programs/DataScience_Program3.docx" download class="exp-download-btn">&#x2B07; Download</a>
+          </div>
+        </div>
+        <div class="sub-parts">
+          <div class="sub-part"><span class="sub-label">3a</span><span class="sub-text">Handle Missing Data</span></div>
+          <div class="sub-part"><span class="sub-label">3b</span><span class="sub-text">Data Transformation</span></div>
+          <div class="sub-part"><span class="sub-label">3c</span><span class="sub-text">Outlier Detection</span></div>
+          <div class="sub-part"><span class="sub-label">3d</span><span class="sub-text">Regex for Text Manipulation</span></div>
+        </div>
+        <div class="colab-link-section">
+          <a class="colab-link" id="colab-link-3" href="#" target="_blank">📓 <span id="colab-label-3"></span></a>
+        </div>
+        <div class="interpreter-section">
+          <div class="interpreter-header">
+            <div class="interpreter-title">&#x1F40D; Python Interpreter</div>
+            <div class="interpreter-actions">
+              <button class="run-btn" onclick="runCode(3)">&#x25B6; Run</button>
+              <button class="clear-btn" onclick="clearCode(3)">Clear</button>
+            </div>
+          </div>
+          <textarea class="code-editor" id="code-3" placeholder="# Paste your Python code here and click Run..." spellcheck="false"></textarea>
+          <div class="output-area" id="output-3"><span class="output-label">Output</span><span id="output-text-3"></span></div>
+        </div>
+      </div>
+
+      <!-- Program 4 -->
+      <div class="exp-card reveal" id="prog-4">
+        <div class="exp-card-header">
+          <div class="exp-card-title-area">
+            <div class="exp-number">4</div>
+            <div class="exp-card-title">Data Wrangling</div>
+            <span class="exp-file-badge">DOCX</span>
+          </div>
+          <div class="exp-btn-group">
+            <button onclick="viewDoc('experiments_zip/DS Programs/DS_Program4.docx','Program 4 - Data Wrangling')" class="exp-view-btn">&#x1F441; View</button>
+            <a href="experiments_zip/DS Programs/DS_Program4.docx" download class="exp-download-btn">&#x2B07; Download</a>
+          </div>
+        </div>
+        <div class="sub-parts">
+          <div class="sub-part"><span class="sub-label">4a</span><span class="sub-text">Hierarchical Indexing</span></div>
+          <div class="sub-part"><span class="sub-label">4b</span><span class="sub-text">Stack and Unstack</span></div>
+          <div class="sub-part"><span class="sub-label">4c</span><span class="sub-text">Merge and Combine</span></div>
+        </div>
+        <div class="colab-link-section">
+          <a class="colab-link" id="colab-link-4" href="#" target="_blank">📓 <span id="colab-label-4"></span></a>
+        </div>
+        <div class="interpreter-section">
+          <div class="interpreter-header">
+            <div class="interpreter-title">&#x1F40D; Python Interpreter</div>
+            <div class="interpreter-actions">
+              <button class="run-btn" onclick="runCode(4)">&#x25B6; Run</button>
+              <button class="clear-btn" onclick="clearCode(4)">Clear</button>
+            </div>
+          </div>
+          <textarea class="code-editor" id="code-4" placeholder="# Paste your Python code here and click Run..." spellcheck="false"></textarea>
+          <div class="output-area" id="output-4"><span class="output-label">Output</span><span id="output-text-4"></span></div>
+        </div>
+      </div>
+
+      <!-- Program 5 -->
+      <div class="exp-card reveal" id="prog-5">
+        <div class="exp-card-header">
+          <div class="exp-card-title-area">
+            <div class="exp-number">5</div>
+            <div class="exp-card-title">Data Visualization with Matplotlib and Seaborn</div>
+            <span class="exp-file-badge">DOCX</span>
+          </div>
+          <div class="exp-btn-group">
+            <button onclick="viewDoc('experiments_zip/DS Programs/DS_Program5.docx','Program 5 - Visualization')" class="exp-view-btn">&#x1F441; View</button>
+            <a href="experiments_zip/DS Programs/DS_Program5.docx" download class="exp-download-btn">&#x2B07; Download</a>
+          </div>
+        </div>
+        <div class="sub-parts">
+          <div class="sub-part"><span class="sub-label">5a</span><span class="sub-text">Line Plot</span></div>
+          <div class="sub-part"><span class="sub-label">5b</span><span class="sub-text">Bar Plots</span></div>
+          <div class="sub-part"><span class="sub-label">5c</span><span class="sub-text">Histogram and Density Plot</span></div>
+          <div class="sub-part"><span class="sub-label">5d</span><span class="sub-text">Scatter Plot</span></div>
+          <div class="sub-part"><span class="sub-label">5e</span><span class="sub-text">Box Plot</span></div>
+        </div>
+        <div class="colab-link-section">
+          <a class="colab-link" id="colab-link-5" href="#" target="_blank">📓 <span id="colab-label-5"></span></a>
+        </div>
+        <div class="interpreter-section">
+          <div class="interpreter-header">
+            <div class="interpreter-title">&#x1F40D; Python Interpreter</div>
+            <div class="interpreter-actions">
+              <button class="run-btn" onclick="runCode(5)">&#x25B6; Run</button>
+              <button class="clear-btn" onclick="clearCode(5)">Clear</button>
+            </div>
+          </div>
+          <textarea class="code-editor" id="code-5" placeholder="# Paste your Python code here and click Run..." spellcheck="false"></textarea>
+          <div class="output-area" id="output-5"><span class="output-label">Output</span><span id="output-text-5"></span></div>
+        </div>
+      </div>
+
+      <!-- Program 6 -->
+      <div class="exp-card reveal" id="prog-6">
+        <div class="exp-card-header">
+          <div class="exp-card-title-area">
+            <div class="exp-number">6</div>
+            <div class="exp-card-title">Time Series Analysis</div>
+            <span class="exp-file-badge">DOCX</span>
+          </div>
+          <div class="exp-btn-group">
+            <button onclick="viewDoc('experiments_zip/DS Programs/DS_Program6.docx','Program 6 - Time Series')" class="exp-view-btn">&#x1F441; View</button>
+            <a href="experiments_zip/DS Programs/DS_Program6.docx" download class="exp-download-btn">&#x2B07; Download</a>
+          </div>
+        </div>
+        <div class="sub-parts">
+          <div class="sub-part"><span class="sub-label">6a</span><span class="sub-text">Create Time Series</span></div>
+          <div class="sub-part"><span class="sub-label">6b</span><span class="sub-text">Time Zone Conversion</span></div>
+          <div class="sub-part"><span class="sub-label">6c</span><span class="sub-text">Period Arithmetic and Conversion</span></div>
+          <div class="sub-part"><span class="sub-label">6d</span><span class="sub-text">Resampling</span></div>
+        </div>
+        <div class="colab-link-section">
+          <a class="colab-link" id="colab-link-6" href="#" target="_blank">📓 <span id="colab-label-6"></span></a>
+        </div>
+        <div class="interpreter-section">
+          <div class="interpreter-header">
+            <div class="interpreter-title">&#x1F40D; Python Interpreter</div>
+            <div class="interpreter-actions">
+              <button class="run-btn" onclick="runCode(6)">&#x25B6; Run</button>
+              <button class="clear-btn" onclick="clearCode(6)">Clear</button>
+            </div>
+          </div>
+          <textarea class="code-editor" id="code-6" placeholder="# Paste your Python code here and click Run..." spellcheck="false"></textarea>
+          <div class="output-area" id="output-6"><span class="output-label">Output</span><span id="output-text-6"></span></div>
+        </div>
+      </div>
+
+      <!-- Program 7 -->
+      <div class="exp-card reveal" id="prog-7">
+        <div class="exp-card-header">
+          <div class="exp-card-title-area">
+            <div class="exp-number">7</div>
+            <div class="exp-card-title">Data Aggregation</div>
+            <span class="exp-file-badge">DOCX</span>
+          </div>
+          <div class="exp-btn-group">
+            <button onclick="viewDoc('experiments_zip/DS Programs/DS_Program7.docx','Program 7 - Aggregation')" class="exp-view-btn">&#x1F441; View</button>
+            <a href="experiments_zip/DS Programs/DS_Program7.docx" download class="exp-download-btn">&#x2B07; Download</a>
+          </div>
+        </div>
+        <div class="sub-parts">
+          <div class="sub-part"><span class="sub-label">7a</span><span class="sub-text">GroupBy Single Key</span></div>
+          <div class="sub-part"><span class="sub-label">7b</span><span class="sub-text">GroupBy Multiple Keys</span></div>
+        </div>
+        <div class="colab-link-section">
+          <a class="colab-link" id="colab-link-7" href="#" target="_blank">📓 <span id="colab-label-7"></span></a>
+        </div>
+        <div class="interpreter-section">
+          <div class="interpreter-header">
+            <div class="interpreter-title">&#x1F40D; Python Interpreter</div>
+            <div class="interpreter-actions">
+              <button class="run-btn" onclick="runCode(7)">&#x25B6; Run</button>
+              <button class="clear-btn" onclick="clearCode(7)">Clear</button>
+            </div>
+          </div>
+          <textarea class="code-editor" id="code-7" placeholder="# Paste your Python code here and click Run..." spellcheck="false"></textarea>
+          <div class="output-area" id="output-7"><span class="output-label">Output</span><span id="output-text-7"></span></div>
+        </div>
+      </div>
+
+      <!-- Program 8 -->
+      <div class="exp-card reveal" id="prog-8">
+        <div class="exp-card-header">
+          <div class="exp-card-title-area">
+            <div class="exp-number">8</div>
+            <div class="exp-card-title">Web Scraping using Beautiful Soup</div>
+            <span class="exp-file-badge">DOCX</span>
+          </div>
+          <div class="exp-btn-group">
+            <button onclick="viewDoc('experiments_zip/DS Programs/DS_Program8.docx','Program 8 - Web Scraping')" class="exp-view-btn">&#x1F441; View</button>
+            <a href="experiments_zip/DS Programs/DS_Program8.docx" download class="exp-download-btn">&#x2B07; Download</a>
+          </div>
+        </div>
+        <div class="sub-parts">
+          <div class="sub-part"><span class="sub-label">8a</span><span class="sub-text">Scrape Amazon Reviews</span></div>
+        </div>
+        <div class="colab-link-section">
+          <a class="colab-link" id="colab-link-8" href="#" target="_blank">📓 <span id="colab-label-8"></span></a>
+        </div>
+        <div class="interpreter-section">
+          <div class="interpreter-header">
+            <div class="interpreter-title">&#x1F40D; Python Interpreter</div>
+            <div class="interpreter-actions">
+              <button class="run-btn" onclick="runCode(8)">&#x25B6; Run</button>
+              <button class="clear-btn" onclick="clearCode(8)">Clear</button>
+            </div>
+          </div>
+          <textarea class="code-editor" id="code-8" placeholder="# Paste your Python code here and click Run..." spellcheck="false"></textarea>
+          <div class="output-area" id="output-8"><span class="output-label">Output</span><span id="output-text-8"></span></div>
+        </div>
+      </div>
+
+      <!-- Program 9 -->
+      <div class="exp-card reveal" id="prog-9">
+        <div class="exp-card-header">
+          <div class="exp-card-title-area">
+            <div class="exp-number">9</div>
+            <div class="exp-card-title">Case Study: Customer Personality Analysis</div>
+            <span class="exp-file-badge">DOCX</span>
+          </div>
+          <div class="exp-btn-group">
+            <button onclick="viewDoc('experiments_zip/DS Programs/DS_Program9.docx','Program 9 - Customer Analysis')" class="exp-view-btn">&#x1F441; View</button>
+            <a href="experiments_zip/DS Programs/DS_Program9.docx" download class="exp-download-btn">&#x2B07; Download</a>
+          </div>
+        </div>
+        <div class="sub-parts">
+          <div class="sub-part"><span class="sub-label">9a</span><span class="sub-text">KMeans Clustering on Mall Customers Dataset</span></div>
+        </div>
+        <div class="colab-link-section">
+          <a class="colab-link" id="colab-link-9" href="#" target="_blank">📓 <span id="colab-label-9"></span></a>
+        </div>
+        <div class="interpreter-section">
+          <div class="interpreter-header">
+            <div class="interpreter-title">&#x1F40D; Python Interpreter</div>
+            <div class="interpreter-actions">
+              <button class="run-btn" onclick="runCode(9)">&#x25B6; Run</button>
+              <button class="clear-btn" onclick="clearCode(9)">Clear</button>
+            </div>
+          </div>
+          <textarea class="code-editor" id="code-9" placeholder="# Paste your Python code here and click Run..." spellcheck="false"></textarea>
+          <div class="output-area" id="output-9"><span class="output-label">Output</span><span id="output-text-9"></span></div>
+        </div>
+      </div>
+
+      <!-- Program 10 -->
+      <div class="exp-card reveal" id="prog-10">
+        <div class="exp-card-header">
+          <div class="exp-card-title-area">
+            <div class="exp-number">10</div>
+            <div class="exp-card-title">Case Study: Text Emotion Detection</div>
+            <span class="exp-file-badge">DOCX</span>
+          </div>
+          <div class="exp-btn-group">
+            <button onclick="viewDoc('experiments_zip/DS Programs/DS_Program10.docx','Program 10 - Emotion Detection')" class="exp-view-btn">&#x1F441; View</button>
+            <a href="experiments_zip/DS Programs/DS_Program10.docx" download class="exp-download-btn">&#x2B07; Download</a>
+          </div>
+        </div>
+        <div class="sub-parts">
+          <div class="sub-part"><span class="sub-label">10a</span><span class="sub-text">Naive Bayes Text Classification</span></div>
+        </div>
+        <div class="colab-link-section">
+          <a class="colab-link" id="colab-link-10" href="#" target="_blank">📓 <span id="colab-label-10"></span></a>
+        </div>
+        <div class="interpreter-section">
+          <div class="interpreter-header">
+            <div class="interpreter-title">&#x1F40D; Python Interpreter</div>
+            <div class="interpreter-actions">
+              <button class="run-btn" onclick="runCode(10)">&#x25B6; Run</button>
+              <button class="clear-btn" onclick="clearCode(10)">Clear</button>
+            </div>
+          </div>
+          <textarea class="code-editor" id="code-10" placeholder="# Paste your Python code here and click Run..." spellcheck="false"></textarea>
+          <div class="output-area" id="output-10"><span class="output-label">Output</span><span id="output-text-10"></span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Fullscreen Document Viewer Modal -->
+  <div class="doc-fullscreen-overlay" id="doc-viewer-overlay">
+    <div class="doc-fullscreen-header">
+      <h3 id="doc-viewer-title">Document Viewer</h3>
+      <button class="doc-fullscreen-close" onclick="closeDocViewer()">&#x2716; Close</button>
+    </div>
+    <div class="doc-fullscreen-body">
+      <div class="doc-loading" id="doc-loading">
+        <div class="doc-loading-spinner"></div>
+        <span>Loading document...</span>
+      </div>
+      <iframe id="doc-viewer-iframe" src="" title="Document Viewer" style="display:none;"></iframe>
+      <div class="doc-rendered-content" id="doc-rendered-content"></div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-wand">&#x26A1;&#x1FA84;&#x26A1;</div>
+    <p class="footer-line"><span>P.M.Swetha Shree</span> &#xB7; Data Science &#x2013; Digital Library</p>
+    <p class="footer-line" style="font-size:0.75rem; margin-top:0.3rem;">Crafted with &#x2728; magic</p>
+  </footer>
+
+  <script src="js/colab-links.js"></script>
+  <script src="js/main.js"></script>
+
+  <!-- Pyodide - Python in the browser -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+
+  <script>
+    // ===== Populate Colab Links from colab-links.js =====
+    document.addEventListener('DOMContentLoaded', () => {
+      for (let i = 1; i <= 10; i++) {
+        const linkEl = document.getElementById('colab-link-' + i);
+        const labelEl = document.getElementById('colab-label-' + i);
+        if (linkEl && COLAB_LINKS[i]) {
+          linkEl.href = COLAB_LINKS[i];
+        }
+        if (labelEl && COLAB_LABELS[i]) {
+          labelEl.textContent = COLAB_LABELS[i] + ' — Open in Colab';
+        }
+      }
+    });
+
+    // ===== Code Runner Tab Switching =====
+    function switchRunnerTab(lang) {
+      document.querySelectorAll('.runner-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.runner-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('runner-' + lang).classList.add('active');
+      // Find & activate the matching tab button
+      document.querySelectorAll('.runner-tab').forEach(t => {
+        if (t.textContent.toLowerCase().includes(lang === 'cpp' ? 'c++' : lang)) t.classList.add('active');
+      });
+    }
+
+    // ===== Pyodide Python Interpreter =====
+    let pyodide = null;
+    let pyodideReady = false;
+    let pyodideLoading = false;
+
+    async function loadPyodideEngine() {
+      if (pyodideLoading || pyodideReady) return;
+      pyodideLoading = true;
+
+      const indicator = document.getElementById('pyodide-indicator');
+      const statusText = document.getElementById('pyodide-status-text');
+      if (indicator) indicator.className = 'pyodide-dot loading';
+      if (statusText) statusText.textContent = 'Loading Python...';
+
+      try {
+        pyodide = await loadPyodide({
+          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
+        });
+
+        if (statusText) statusText.textContent = 'Loading packages...';
+        await pyodide.loadPackage(['numpy', 'pandas']);
+
+        pyodideReady = true;
+        if (indicator) indicator.className = 'pyodide-dot ready';
+        if (statusText) statusText.textContent = 'Python Ready';
+      } catch (err) {
+        if (indicator) indicator.className = 'pyodide-dot';
+        if (statusText) statusText.textContent = 'Failed to load';
+        console.error('Pyodide load error:', err);
+      }
+      pyodideLoading = false;
+    }
+
+    document.addEventListener('DOMContentLoaded', loadPyodideEngine);
+
+    // Run Python in the code runner panel
+    async function runRunnerPython() {
+      const code = document.getElementById('runner-code-python').value.trim();
+      const resultEl = document.getElementById('runner-result-python');
+      if (!code) { resultEl.innerHTML = '<span class="error">Please enter some code.</span>'; return; }
+      if (!pyodideReady) { resultEl.innerHTML = '<span class="error">Python is still loading...</span>'; await loadPyodideEngine(); return; }
+      resultEl.innerHTML = '<span class="success">Running...</span>';
+      try {
+        pyodide.runPython('import sys\nfrom io import StringIO\n_co = StringIO()\nsys.stdout = _co\nsys.stderr = _co');
+        await pyodide.runPythonAsync(code);
+        const out = pyodide.runPython('_r = _co.getvalue()\nsys.stdout = sys.__stdout__\nsys.stderr = sys.__stderr__\n_r');
+        resultEl.innerHTML = out && out.trim() ? '<span class="success">' + escapeHtml(out) + '</span>' : '<span class="success">Done (no output).</span>';
+      } catch (err) {
+        try { pyodide.runPython('import sys\nsys.stdout = sys.__stdout__\nsys.stderr = sys.__stderr__'); } catch(e){}
+        resultEl.innerHTML = '<span class="error">' + escapeHtml(err.message || String(err)) + '</span>';
+      }
+    }
+
+    // Run per-experiment Python
+    async function runCode(num) {
+      const codeEl = document.getElementById('code-' + num);
+      const outputArea = document.getElementById('output-' + num);
+      const outputText = document.getElementById('output-text-' + num);
+      const code = codeEl.value.trim();
+      if (!code) { outputArea.classList.add('has-output'); outputText.innerHTML = '<span class="error">Please enter some code to run.</span>'; return; }
+      if (!pyodideReady) { outputArea.classList.add('has-output'); outputText.innerHTML = '<span class="error">Python is still loading...</span>'; await loadPyodideEngine(); return; }
+      outputArea.classList.add('has-output');
+      outputText.innerHTML = '<span class="success">Running...</span>';
+      try {
+        pyodide.runPython('import sys\nfrom io import StringIO\n_captured_output = StringIO()\nsys.stdout = _captured_output\nsys.stderr = _captured_output');
+        await pyodide.runPythonAsync(code);
+        const output = pyodide.runPython('_result = _captured_output.getvalue()\nsys.stdout = sys.__stdout__\nsys.stderr = sys.__stderr__\n_result');
+        outputText.innerHTML = output && output.trim() ? '<span class="success">' + escapeHtml(output) + '</span>' : '<span class="success">Code executed successfully (no output).</span>';
+      } catch (err) {
+        try { pyodide.runPython('import sys\nsys.stdout = sys.__stdout__\nsys.stderr = sys.__stderr__'); } catch(e){}
+        outputText.innerHTML = '<span class="error">' + escapeHtml(err.message || String(err)) + '</span>';
+      }
+    }
+
+    function clearCode(num) {
+      document.getElementById('code-' + num).value = '';
+      const oa = document.getElementById('output-' + num);
+      const ot = document.getElementById('output-text-' + num);
+      oa.classList.remove('has-output');
+      ot.innerHTML = '';
+    }
+
+    function clearRunner(lang) {
+      document.getElementById('runner-code-' + lang).value = '';
+      document.getElementById('runner-result-' + lang).innerHTML = '<span style="color:rgba(232,213,163,0.5);">Run code to see output...</span>';
+    }
+
+    // ===== Judge0 CE API for C, C++, Java =====
+    const JUDGE0_API = 'https://judge0-ce.p.rapidapi.com';
+    const JUDGE0_KEY = ''; // User needs to get a free key from RapidAPI
+
+    async function runJudge0(lang, languageId) {
+      const code = document.getElementById('runner-code-' + lang).value.trim();
+      const resultEl = document.getElementById('runner-result-' + lang);
+      const stdinEl = document.getElementById('runner-stdin-' + lang);
+      const stdin = stdinEl ? stdinEl.value : '';
+
+      if (!code) { resultEl.innerHTML = '<span class="error">Please enter some code.</span>'; return; }
+
+      // If no API key, show instructions
+      if (!JUDGE0_KEY) {
+        resultEl.innerHTML = '<span class="error">Judge0 API key not configured.\n\nTo use C/C++/Java compilation:\n1. Go to https://rapidapi.com/judge0-official/api/judge0-ce\n2. Sign up for a free account\n3. Copy your API key\n4. Paste it in experiments.html → JUDGE0_KEY variable\n\nAlternatively, you can use an online compiler like:\nhttps://www.onlinegdb.com/</span>';
+        return;
+      }
+
+      resultEl.innerHTML = '<span class="success">Compiling & running...</span>';
+
+      try {
+        const submitRes = await fetch(JUDGE0_API + '/submissions?base64_encoded=true&wait=true', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-RapidAPI-Key': JUDGE0_KEY,
+            'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
+          },
+          body: JSON.stringify({
+            source_code: btoa(unescape(encodeURIComponent(code))),
+            language_id: languageId,
+            stdin: btoa(unescape(encodeURIComponent(stdin)))
+          })
+        });
+
+        const data = await submitRes.json();
+
+        if (data.stdout) {
+          resultEl.innerHTML = '<span class="success">' + escapeHtml(atob(data.stdout)) + '</span>';
+        } else if (data.stderr) {
+          resultEl.innerHTML = '<span class="error">' + escapeHtml(atob(data.stderr)) + '</span>';
+        } else if (data.compile_output) {
+          resultEl.innerHTML = '<span class="error">' + escapeHtml(atob(data.compile_output)) + '</span>';
+        } else if (data.message) {
+          resultEl.innerHTML = '<span class="error">' + escapeHtml(data.message) + '</span>';
+        } else {
+          resultEl.innerHTML = '<span class="success">Done (no output).</span>';
+        }
+      } catch (err) {
+        resultEl.innerHTML = '<span class="error">API Error: ' + escapeHtml(err.message) + '\n\nTip: Make sure you have a valid Judge0 API key.\nOr use https://www.onlinegdb.com/ as an alternative.</span>';
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Tab key support in code editors
+    document.querySelectorAll('.code-editor, .runner-editor').forEach(editor => {
+      editor.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = this.selectionStart;
+          const end = this.selectionEnd;
+          this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+          this.selectionStart = this.selectionEnd = start + 4;
+        }
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          if (this.id.startsWith('runner-code-')) {
+            const lang = this.id.replace('runner-code-', '');
+            if (lang === 'python') runRunnerPython();
+            else if (lang === 'c') runJudge0('c', 50);
+            else if (lang === 'cpp') runJudge0('cpp', 54);
+            else if (lang === 'java') runJudge0('java', 62);
+          } else {
+            const num = this.id.replace('code-', '');
+            runCode(parseInt(num));
+          }
+        }
+      });
+    });
+
+    // ===== Document Viewer (mammoth.js) =====
+    function viewDoc(filePath, title) {
+      const overlay = document.getElementById('doc-viewer-overlay');
+      const titleEl = document.getElementById('doc-viewer-title');
+      const loading = document.getElementById('doc-loading');
+      const content = document.getElementById('doc-rendered-content');
+      titleEl.textContent = title;
+      loading.style.display = 'flex';
+      content.innerHTML = '';
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      fetch(filePath)
+        .then(r => { if (!r.ok) throw new Error('File not found'); return r.arrayBuffer(); })
+        .then(ab => mammoth.convertToHtml({ arrayBuffer: ab }))
+        .then(result => { loading.style.display = 'none'; content.innerHTML = result.value; })
+        .catch(err => { loading.style.display = 'none'; content.innerHTML = '<p style="color:#f44747;text-align:center;margin-top:2rem;">Could not load document.<br><small>' + err.message + '</small><br><br><small>Tip: If viewing locally, try opening via a local server (e.g., Live Server extension in VS Code).</small></p>'; });
+    }
+
+    function closeDocViewer() {
+      document.getElementById('doc-viewer-overlay').classList.remove('active');
+      document.getElementById('doc-rendered-content').innerHTML = '';
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDocViewer(); });
+
+    // Hash-based scroll
+    document.addEventListener('DOMContentLoaded', () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const target = document.querySelector(hash);
+        if (target) setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+      }
+    });
+  </script>
+</body>
+</html>
